@@ -1,23 +1,30 @@
 {
-  "title": "H5PEditor.Boilerplate",
-  "majorVersion": 0,
-  "minorVersion": 1,
+  "title": "H5PEditor.KeywordExtractor",
+  "majorVersion": 1,
+  "minorVersion": 0,
   "patchVersion": 0,
   "runnable": 0,
-  "machineName": "H5PEditor.Boilerplate",
+  "machineName": "H5PEditor.KeywordExtractor",
   "coreApi": {
     "majorVersion": 1,
-    "minorVersion": 12
+    "minorVersion": 23
   },
-  "author": "Oliver Tacke",
+  "author": "Ravi Majithia",
   "preloadedJs": [
     {
-      "path": "dist/h5peditor-boilerplate.js"
+      "path": "dist/h5peditor-keyword-extractor.js"
     }
   ],
   "preloadedCss": [
     {
-      "path": "dist/h5peditor-boilerplate.css"
+      "path": "dist/h5peditor-keyword-extractor.css"
+    }
+  ],
+  "preloadedDependencies": [
+    {
+      "machineName": "FontAwesome",
+      "majorVersion": 4,
+      "minorVersion": 5
     }
   ]
 }

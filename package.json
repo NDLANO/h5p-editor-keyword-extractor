@@ -1,7 +1,7 @@
 {
-  "name": "h5peditor-boilerplate",
-  "version": "0.1.0",
-  "description": "Start your own H5P editor widget",
+  "name": "h5peditor-keyword-extractor",
+  "version": "1.0.0",
+  "description": "Extract keywords from the content or allows to add custom keyword",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,13 +11,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/otacke/h5p-editor-boilerplate.git"
+    "url": "git+https://github.com/NDLANO/h5p-editor-keyword-extractor.git"
   },
   "keywords": [
     "h5p",
     "editor"
   ],
-  "author": "Oliver Tacke",
+  "author": "Ravi Majithia",
   "license": "MIT",
   "devDependencies": {
     "@babel/cli": "^7.21.0",
@@ -27,7 +27,9 @@
     "babel-loader": "^9.1.2",
     "css-loader": "^6.7.3",
     "eslint": "^8.38.0",
+    "eslint-config-ndla-h5p": "github:ndlano/eslint-config-ndla-h5p",
     "eslint-plugin-jsdoc": "^43.0.6",
+    "keyword-extractor": "^0.0.25",
     "mini-css-extract-plugin": "^2.7.5",
     "regenerator-runtime": "^0.13.11",
     "sass": "^1.62.0",

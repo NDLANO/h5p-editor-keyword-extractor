@@ -10,7 +10,7 @@
     "es2020": true
   },
   "extends": [
-    "eslint:recommended",
+    "eslint-config-ndla-h5p",
     "plugin:jsdoc/recommended"
   ],
   "parserOptions": {

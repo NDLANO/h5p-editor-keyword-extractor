@@ -60,16 +60,6 @@ module.exports = {
             loader: 'sass-loader'
           }
         ]
-      },
-      {
-        test: /\.(svg|png|jpg|gif)$/,
-        include: path.join(__dirname, 'src/images'),
-        type: 'asset/resource'
-      },
-      {
-        test: /\.(woff|woff2|eot|ttf)$/,
-        include: path.join(__dirname, 'src/fonts'),
-        type: 'asset/resource'
       }
     ]
   },

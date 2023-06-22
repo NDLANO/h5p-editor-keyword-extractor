@@ -1,5 +1,6 @@
 {
   "libraryStrings": {
-    "foo": "bar"
+    "generateKeywords": "Extract Keywords",
+    "addKeywords": "Add Keywords"
   }
 }
