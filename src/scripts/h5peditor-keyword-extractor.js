@@ -1,7 +1,5 @@
 import * as KeywordExtractorEngine from 'keyword-extractor';
-
-/** Class for Boilerplate H5P widget */
-export default class KeywordExtractor {
+class KeywordExtractor {
 
   /**
    * @class
@@ -15,6 +13,7 @@ export default class KeywordExtractor {
     this.field = field;
     this.params = params;
     this.setValue = setValue;
+    this.keywords = [];
 
     // Let parent handle ready callbacks of children
     this.passReadies = true;
@@ -42,14 +41,16 @@ export default class KeywordExtractor {
     });
 
     this.$keywordContainer = H5P.jQuery('<div/>', {
-      'class': 'h5p-keyword-container'
+      'class': 'h5p-keyword-container',
+      'aria-label': `${this.t('keywordRemoveButton')}`,
+      'role': 'list'
     });
     this.$keywordContainer.appendTo(this.$container.find('.content'));
 
     // Generate keywords if the previous content is not empty
-    const content = this.fieldInstance.children[2].$input.val().trim();
+    const content = this.getFieldValueByName(KeywordExtractor.KEYWORDS_FIELD);
     if (content) {
-      this.addKeywords(2);
+      this.addKeywords(content);
     }
     this.$errors = this.$container.find('.h5p-errors');
   }
@@ -80,18 +81,21 @@ export default class KeywordExtractor {
   /**
    * Create button for field.
    * @param {object} child Field.
-   * @param {number} index Index of the field.
    * @returns {H5P.jQuery} Button.
    */
-  createButton(child, index) {
+  createButton(child) {
     return H5P.jQuery('<button/>', {
       'class': 'h5peditor-button h5peditor-button-textual',
       type: 'button',
       text: this.t(`${child.field.addButton}`),
       click: () => {
         child.field.addButton === 'generateKeywords'
-          ? this.generateKeywords(index)
-          : this.addKeywords(index);
+          ? this.generateKeywords(
+            this.getFieldValueByName(KeywordExtractor.CONTENT_TEXT_FIELD)
+          )
+          : this.addKeywords(
+            this.getFieldValueByName(KeywordExtractor.CUSTOM_KEYWORD_FIELD)
+          );
       },
       appendTo: child.$item
     });
@@ -109,18 +113,17 @@ export default class KeywordExtractor {
 
   /**
    * Generate keywords from text.
-   * @param {number} index Index of the field.
-   * @returns {void}
+   * @param {string} value text where the keywords will extracted automatically.
    */
-  generateKeywords(index) {
-    const content = this.fieldInstance.children[index].$input.val().trim();
+  generateKeywords(value) {
     // check if content is empty then return
-    if (!content)
+    if (!value)
       return;
 
+    // currently this module support limited languages
     const extraction_result =
-      KeywordExtractorEngine.extract(content, {
-        language: 'english',
+      KeywordExtractorEngine.extract(value, {
+        language: KeywordExtractor.LANG[H5PEditor.contentLanguage],
         remove_digits: true,
         return_changed_case:true,
         remove_duplicates: true
@@ -132,17 +135,18 @@ export default class KeywordExtractor {
 
   /**
    * Add keywords to the list.
-   * @param {number} index Index of the field.
-   * @returns {void}
+   * @param {string} value keyword(s) can be comma separated.
    */
-  addKeywords(index) {
-    const content = this.fieldInstance.children[index].$input.val().trim();
-    if (!content)
+  addKeywords(value) {
+    if (!value)
       return;
 
     // Add keywords to the list
-    const keywords = content.split(',').map((keyword) => keyword.trim());
+    const keywords = value.split(',').filter((keyword) => keyword !== '');
     this.addKeywordsToList(keywords);
+
+    // Reset the field
+    this.getFieldByName(KeywordExtractor.CUSTOM_KEYWORD_FIELD).forceValue('');
   }
 
   /**
@@ -152,65 +156,87 @@ export default class KeywordExtractor {
   addKeywordsToList(keywords) {
     // loop through keywords and create span element from each keyword
     for (let keyword of keywords) {
-      const $keyword = H5P.jQuery('<span>', {
-        class: 'extracted-keyword',
-        text: keyword,
-        click: () => {
-          $keyword.remove();
-          this.keywordSyncWithField('toField');
-        }
+      if (this.keywords.includes(keyword)) {
+        continue;
+      }
+      // maintain single source of truth
+      this.keywords.push(keyword);
+
+      // Create keyword
+      const newKeyword = document.createElement('button');
+      newKeyword.href = 'javascript: void(0)';
+      newKeyword.classList.add('extracted-keyword');
+      newKeyword.textContent = keyword.trim();
+      newKeyword.ariaLabel = `${keyword.trim()} - ${this.t(
+        'keywordRemoveButton'
+      )}`;
+      newKeyword.addEventListener('click', (event) => {
+        event.target.remove();
+        this.keywords = this.keywords.filter(
+          (key) => key !== event.target.textContent
+        );
+
+        // Remove current keyword from the list
+        this.keywordSyncWithField(this.keywords);
       });
-      this.$keywordContainer.append($keyword);
+      this.$keywordContainer.append(newKeyword);
     }
-    this.keywordSyncWithField('toField');
+
+    this.keywordSyncWithField(keywords);
   }
 
   /**
    * Sync keywords with field.
-   * @param {string} direction Direction of sync.
+   * @param {Array} keywords Keywords.
    */
-  keywordSyncWithField(direction) {
-    if (direction === 'toField') {
-      // get all keywords
-      const keywords = this.$keywordContainer.find('.extracted-keyword');
-      const keywordsArray = [];
-      for (let keyword of keywords) {
-        keywordsArray.push(keyword.textContent);
+  keywordSyncWithField(keywords) {
+    // set keywords to field
+    this.getFieldByName(KeywordExtractor.KEYWORDS_FIELD).forceValue(
+      keywords.join(',')
+    );
+  }
+
+  /**
+   * Get editor field's value by name
+   * @param {string} key name of the field.
+   * @returns {string} value of the field.
+   */
+  getFieldValueByName(key) {
+    let value;
+    this.fieldInstance.forEachChild((child) => {
+      if (child.field.name === key) {
+        value = child.$input.val().trim();
       }
+    });
 
-      // set keywords to field
-      this.setInputValue(
-        this.fieldInstance.children[2].$input[0],
-        keywordsArray.join(',')
-      );
-    }
+    return value;
   }
 
   /**
-   * Set the given value for the given input and trigger the change event.
-   * @private
-   * @param {HTMLInputElement} input Input element.
-   * @param {string} value New value.
-   * @returns {void} Nothing.
+   * Get editor field's value by name
+   * @param {string} key name of the field.
+   * @returns {HTMLElement} value of the field.
    */
-  setInputValue(input, value) {
-    input.value = value;
-    input.dispatchEvent(this.createNewEvent('change'));
-  }
+  getFieldByName(key) {
+    let field;
+    this.fieldInstance.forEachChild((child) => {
+      if (child.field.name === key) {
+        field = child;
+      }
+    });
 
-  /**
-   * Create a new event, using a fallback for older browsers (IE11).
-   * @param {string} type Event type.
-   * @returns {Event} Event.
-   */
-  createNewEvent(type) {
-    if (typeof Event !== 'function') {
-      var event = document.createEvent('Event');
-      event.initEvent(type, true, true);
-      return event;
-    }
-    else {
-      return new Event(type);
-    }
+    return field;
   }
 }
+
+// Field constants - reference semantics.json of h5p-keywords
+KeywordExtractor.CONTENT_TEXT_FIELD = 'contentText';
+KeywordExtractor.CUSTOM_KEYWORD_FIELD = 'customKeywords';
+KeywordExtractor.KEYWORDS_FIELD = 'keywords';
+
+// Language constant for automatic keyword extraction
+KeywordExtractor.LANG = {
+  'en': 'english'
+};
+
+export default KeywordExtractor;

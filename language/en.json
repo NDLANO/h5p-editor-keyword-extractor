@@ -1,6 +1,8 @@
 {
   "libraryStrings": {
     "generateKeywords": "Extract Keywords",
-    "addKeywords": "Add Keywords"
+    "addKeywords": "Add Keywords",
+    "keywordRemoveButton" : "Click to remove",
+    "keywordList" : "List of keywords"
   }
 }
