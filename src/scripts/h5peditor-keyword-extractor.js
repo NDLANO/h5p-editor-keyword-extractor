@@ -185,8 +185,7 @@ export default class KeywordExtractor {
       this.keywordLabels.push(keyword);
 
       keywordElement.addEventListener('click', () => {
-        // TODO: Take care of focus
-        keywordElement.remove();
+        keywordElement.parentNode.remove();
 
         this.keywordLabels = this.keywordLabels.filter((keywordText) => {
           return keywordText !== keyword;
