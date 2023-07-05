@@ -1,6 +1,6 @@
 import * as KeywordExtractorEngine from 'keyword-extractor';
 
-/** Class for Boilerplate H5P widget */
+/** Class for KeywordExtractor widget */
 export default class KeywordExtractor {
 
   /**
@@ -24,7 +24,7 @@ export default class KeywordExtractor {
       class: 'h5peditor-keyword-extractor'
     });
 
-    // Instantiate original field (or create your own and call setValue)
+    // Instantiate original field
     this.fieldInstance = new H5PEditor.widgets[this.field.type](
       this.parent,
       this.field,
@@ -33,18 +33,35 @@ export default class KeywordExtractor {
     );
     this.fieldInstance.appendTo(this.$container);
 
+    // TODO: Only add button after particular fields! Might become more ...
+
     // Add button after field
-    const self = this;
     this.fieldInstance.forEachChild((child, index) => {
       if (child.field.addButton) {
-        self.createButton(child, index);
+
+        const button = document.createElement('button');
+        button.classList.add('h5peditor-button', 'h5peditor-button-textual');
+        button.innerText = this.t(child.field.addButton);
+
+        button.addEventListener('click', () => {
+          if (child.field.addButton === 'generateKeywords') {
+            this.generateKeywords(index);
+          }
+          else {
+            this.addKeywords(index);
+          }
+        });
+
+        child.$item.append(button);
       }
     });
 
-    this.$keywordContainer = H5P.jQuery('<div/>', {
-      'class': 'h5p-keyword-container'
-    });
-    this.$keywordContainer.appendTo(this.$container.find('.content'));
+    this.keywordContainer = document.createElement('div');
+    this.keywordContainer.classList.add('h5p-keyword-container');
+
+    this.$container.find('.content').append(this.keywordContainer);
+
+    // TODO: Don't use index to select field, and store 'content'
 
     // Generate keywords if the previous content is not empty
     const content = this.fieldInstance.children[2].$input.val().trim();
@@ -78,26 +95,6 @@ export default class KeywordExtractor {
   }
 
   /**
-   * Create button for field.
-   * @param {object} child Field.
-   * @param {number} index Index of the field.
-   * @returns {H5P.jQuery} Button.
-   */
-  createButton(child, index) {
-    return H5P.jQuery('<button/>', {
-      'class': 'h5peditor-button h5peditor-button-textual',
-      type: 'button',
-      text: this.t(`${child.field.addButton}`),
-      click: () => {
-        child.field.addButton === 'generateKeywords'
-          ? this.generateKeywords(index)
-          : this.addKeywords(index);
-      },
-      appendTo: child.$item
-    });
-  }
-
-  /**
    * Translate UI texts for this library.
    * @param {string} key Translation string identifier.
    * @param {object} vars Variables to replace in translation string.
@@ -113,6 +110,8 @@ export default class KeywordExtractor {
    * @returns {void}
    */
   generateKeywords(index) {
+    // TODO: Don't use index to select field
+
     const content = this.fieldInstance.children[index].$input.val().trim();
     // check if content is empty then return
     if (!content)
@@ -136,9 +135,12 @@ export default class KeywordExtractor {
    * @returns {void}
    */
   addKeywords(index) {
+    // TODO: Don't use index to select field
+
     const content = this.fieldInstance.children[index].$input.val().trim();
-    if (!content)
+    if (!content) {
       return;
+    }
 
     // Add keywords to the list
     const keywords = content.split(',').map((keyword) => keyword.trim());
@@ -147,21 +149,26 @@ export default class KeywordExtractor {
 
   /**
    * Generate keywords elements.
-   * @param {Array} keywords Keywords.
+   * @param {string[]} keywords Keywords.
    */
-  addKeywordsToList(keywords) {
-    // loop through keywords and create span element from each keyword
-    for (let keyword of keywords) {
-      const $keyword = H5P.jQuery('<span>', {
-        class: 'extracted-keyword',
-        text: keyword,
-        click: () => {
-          $keyword.remove();
-          this.keywordSyncWithField('toField');
-        }
+  addKeywordsToList(keywords = []) {
+    // TODO: Don't use DOM to store keywords
+    // TODO: Don't add keywords that are already in list
+
+    keywords.forEach((keyword) => {
+      const keywordElement = document.createElement('span');
+      keywordElement.classList.add('extracted-keyword');
+      keywordElement.innerText = keyword;
+
+      // TODO: Think about delegating the listener to this.keywordContainer
+      keywordElement.addEventListener('click', () => {
+        keywordElement.remove();
+        this.keywordSyncWithField('toField');
       });
-      this.$keywordContainer.append($keyword);
-    }
+
+      this.keywordContainer.append(keywordElement);
+    });
+
     this.keywordSyncWithField('toField');
   }
 
@@ -172,7 +179,10 @@ export default class KeywordExtractor {
   keywordSyncWithField(direction) {
     if (direction === 'toField') {
       // get all keywords
-      const keywords = this.$keywordContainer.find('.extracted-keyword');
+      const keywords = this.keywordContainer
+        .querySelectorAll('.extracted-keyword');
+
+      // TODO: See above, don't using DOM to store values
       const keywordsArray = [];
       for (let keyword of keywords) {
         keywordsArray.push(keyword.textContent);
@@ -188,29 +198,11 @@ export default class KeywordExtractor {
 
   /**
    * Set the given value for the given input and trigger the change event.
-   * @private
    * @param {HTMLInputElement} input Input element.
    * @param {string} value New value.
-   * @returns {void} Nothing.
    */
   setInputValue(input, value) {
     input.value = value;
-    input.dispatchEvent(this.createNewEvent('change'));
-  }
-
-  /**
-   * Create a new event, using a fallback for older browsers (IE11).
-   * @param {string} type Event type.
-   * @returns {Event} Event.
-   */
-  createNewEvent(type) {
-    if (typeof Event !== 'function') {
-      var event = document.createEvent('Event');
-      event.initEvent(type, true, true);
-      return event;
-    }
-    else {
-      return new Event(type);
-    }
+    input.dispatchEvent(new Event('change'));
   }
 }
