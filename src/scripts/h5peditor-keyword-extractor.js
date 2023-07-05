@@ -190,6 +190,10 @@ export default class KeywordExtractor {
       this.keywordContainer.append(keywordElement);
     });
 
+    // Sort internally and externally
+    this.keywordLabels.sort((a, b) => a > b ? 1 : -1);
+    this.sortNodesByText(this.keywordContainer);
+
     this.updateValues();
   }
 
@@ -203,5 +207,19 @@ export default class KeywordExtractor {
 
     this.keywordsField.$input[0].value = this.keywordLabels ?? '';
     this.keywordsField.$input[0].dispatchEvent(new Event('change'));
+  }
+
+  /**
+   * Sort nodes by inner text.
+   * @param {HTMLElement} parent Parent node of which children will be sorted.
+   */
+  sortNodesByText(parent) {
+    if (!parent instanceof HTMLElement || !parent?.children) {
+      return;
+    }
+
+    [...parent.children]
+      .sort((a, b)=> a.innerText > b.innerText ? 1 : -1)
+      .forEach((node) => parent.append(node));
   }
 }
