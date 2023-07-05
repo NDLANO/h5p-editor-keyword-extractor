@@ -1,3 +1,4 @@
+import H5PUtil from '@services/h5p-util';
 import * as KeywordExtractorEngine from 'keyword-extractor';
 
 /** Class for KeywordExtractor widget */
@@ -33,41 +34,52 @@ export default class KeywordExtractor {
     );
     this.fieldInstance.appendTo(this.$container);
 
-    // TODO: Only add button after particular fields! Might become more ...
+    const buttonConfig = this.field?.keywordExtractor?.buttons ?? {};
+    for (const fieldName in buttonConfig) {
+      const command = buttonConfig[fieldName];
 
-    // Add button after field
-    this.fieldInstance.forEachChild((child, index) => {
-      if (child.field.addButton) {
-
-        const button = document.createElement('button');
-        button.classList.add('h5peditor-button', 'h5peditor-button-textual');
-        button.innerText = this.t(child.field.addButton);
-
-        button.addEventListener('click', () => {
-          if (child.field.addButton === 'generateKeywords') {
-            this.generateKeywords(index);
-          }
-          else {
-            this.addKeywords(index);
-          }
-        });
-
-        child.$item.append(button);
+      if (!['generateKeywords', 'addKeywords'].includes(command)) {
+        return; // No valid command for button
       }
-    });
+
+      const childInstance =
+        H5PUtil.findFieldInstance(fieldName, this.fieldInstance);
+
+      if (
+        !childInstance instanceof H5PEditor.Textarea &&
+        !childInstance instanceof H5PEditor.Text
+      ) {
+        continue;
+      }
+
+      const button = document.createElement('button');
+      button.classList.add('h5peditor-button', 'h5peditor-button-textual');
+      button.innerText = this.t(command);
+
+      button.addEventListener('click', () => {
+        const inputText = childInstance.$input.val().trim();
+
+        if (command === 'generateKeywords') {
+          this.generateKeywords(inputText);
+        }
+        else if (command === 'addKeywords') {
+          this.addKeywords(inputText);
+        }
+      });
+
+      childInstance.$item.append(button);
+    }
 
     this.keywordContainer = document.createElement('div');
     this.keywordContainer.classList.add('h5p-keyword-container');
 
     this.$container.find('.content').append(this.keywordContainer);
 
-    // TODO: Don't use index to select field, and store 'content'
-
-    // Generate keywords if the previous content is not empty
-    const content = this.fieldInstance.children[2].$input.val().trim();
-    if (content) {
-      this.addKeywords(2);
+    // Re-create previously stored keywords
+    if (this.params.keywords) {
+      this.addKeywords(this.params.keywords);
     }
+
     this.$errors = this.$container.find('.h5p-errors');
   }
 
@@ -106,19 +118,11 @@ export default class KeywordExtractor {
 
   /**
    * Generate keywords from text.
-   * @param {number} index Index of the field.
-   * @returns {void}
+   * @param {string} text Text to parse for keywords.
    */
-  generateKeywords(index) {
-    // TODO: Don't use index to select field
-
-    const content = this.fieldInstance.children[index].$input.val().trim();
-    // check if content is empty then return
-    if (!content)
-      return;
-
+  generateKeywords(text) {
     const extraction_result =
-      KeywordExtractorEngine.extract(content, {
+      KeywordExtractorEngine.extract(text, {
         language: 'english',
         remove_digits: true,
         return_changed_case:true,
@@ -131,19 +135,11 @@ export default class KeywordExtractor {
 
   /**
    * Add keywords to the list.
-   * @param {number} index Index of the field.
-   * @returns {void}
+   * @param {string} keywords Comma separated list of keywords.
    */
-  addKeywords(index) {
-    // TODO: Don't use index to select field
-
-    const content = this.fieldInstance.children[index].$input.val().trim();
-    if (!content) {
-      return;
-    }
-
+  addKeywords(keywords) {
     // Add keywords to the list
-    const keywords = content.split(',').map((keyword) => keyword.trim());
+    keywords = keywords.split(',').map((keyword) => keyword.trim());
     this.addKeywordsToList(keywords);
   }
 
