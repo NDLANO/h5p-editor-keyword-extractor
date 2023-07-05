@@ -125,7 +125,7 @@ export default class KeywordExtractor {
       // TODO: Disable button if no action possible
 
       button.addEventListener('click', () => {
-        const inputText = childInstance.$input.val().trim();
+        const inputText = childInstance.$input.get(0).value.trim();
 
         if (command === 'generateKeywords') {
           this.generateKeywords(inputText);
