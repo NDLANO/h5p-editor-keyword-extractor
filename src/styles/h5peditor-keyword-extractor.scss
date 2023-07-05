@@ -1,16 +1,19 @@
 .h5peditor-keyword-extractor {
   display: block;
+
   .field-name-keywords {
     input {
       display: none;
     }
   }
+
   .extracted-keyword {
-    padding: 0.2em 0.3em;
     border: 2px solid green;
-    margin: 0.5em 0.5em 0 0;
-    display: inline-block;
     cursor: pointer;
+    display: inline-block;
+    margin: 0.5em 0.5em 0 0;
+    padding: 0.2em 0.3em;
+
     &:after {
       color: gray;
       content: "\f00d";
