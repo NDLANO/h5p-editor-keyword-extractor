@@ -1,7 +1,7 @@
 /** Class for h5p utility functions */
 export default class H5PUtil {
   /**
-   * Find field instance
+   * Find field instance.
    * @param {string} path Path to look for instance.
    * @param {object} parent H5P Editor widget such as Group, List, etc.
    * @returns {object|boolean} H5P Editor widget or false if nothing found.

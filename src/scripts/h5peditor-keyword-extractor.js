@@ -20,6 +20,8 @@ export default class KeywordExtractor {
     // Let parent handle ready callbacks of children
     this.passReadies = true;
 
+    this.keywordLabels = [];
+
     // DOM
     this.$container = H5P.jQuery('<div>', {
       class: 'h5peditor-keyword-extractor'
@@ -34,46 +36,22 @@ export default class KeywordExtractor {
     );
     this.fieldInstance.appendTo(this.$container);
 
-    const buttonConfig = this.field?.keywordExtractor?.buttons ?? {};
-    for (const fieldName in buttonConfig) {
-      const command = buttonConfig[fieldName];
+    // TODO: Error message if no fieldInstance or not instance of Group
 
-      if (!['generateKeywords', 'addKeywords'].includes(command)) {
-        return; // No valid command for button
-      }
+    this.addButtons();
 
-      const childInstance =
-        H5PUtil.findFieldInstance(fieldName, this.fieldInstance);
+    // Set keywords field
+    this.keywordsField = H5PUtil.findFieldInstance(
+      this.field?.keywordExtractor?.keywords,
+      this.fieldInstance
+    );
 
-      if (
-        !childInstance instanceof H5PEditor.Textarea &&
-        !childInstance instanceof H5PEditor.Text
-      ) {
-        continue;
-      }
-
-      const button = document.createElement('button');
-      button.classList.add('h5peditor-button', 'h5peditor-button-textual');
-      button.innerText = this.t(command);
-
-      button.addEventListener('click', () => {
-        const inputText = childInstance.$input.val().trim();
-
-        if (command === 'generateKeywords') {
-          this.generateKeywords(inputText);
-        }
-        else if (command === 'addKeywords') {
-          this.addKeywords(inputText);
-        }
-      });
-
-      childInstance.$item.append(button);
-    }
+    // TODO: Error message if no keywordsField
 
     this.keywordContainer = document.createElement('div');
     this.keywordContainer.classList.add('h5p-keyword-container');
 
-    this.$container.find('.content').append(this.keywordContainer);
+    this.fieldInstance.$content.get(0).append(this.keywordContainer);
 
     // Re-create previously stored keywords
     if (this.params.keywords) {
@@ -117,6 +95,47 @@ export default class KeywordExtractor {
   }
 
   /**
+   * Add buttons.
+   */
+  addButtons() {
+    const buttonConfig = this.field?.keywordExtractor?.buttons ?? {};
+    for (const fieldName in buttonConfig) {
+      const command = buttonConfig[fieldName];
+
+      if (!['generateKeywords', 'addKeywords'].includes(command)) {
+        return; // No valid command for button
+      }
+
+      const childInstance =
+        H5PUtil.findFieldInstance(fieldName, this.fieldInstance);
+
+      if (
+        !childInstance instanceof H5PEditor.Textarea &&
+        !childInstance instanceof H5PEditor.Text
+      ) {
+        continue;
+      }
+
+      const button = document.createElement('button');
+      button.classList.add('h5peditor-button', 'h5peditor-button-textual');
+      button.innerText = this.t(command);
+
+      button.addEventListener('click', () => {
+        const inputText = childInstance.$input.val().trim();
+
+        if (command === 'generateKeywords') {
+          this.generateKeywords(inputText);
+        }
+        else if (command === 'addKeywords') {
+          this.addKeywords(inputText);
+        }
+      });
+
+      childInstance.$item.append(button);
+    }
+  }
+
+  /**
    * Generate keywords from text.
    * @param {string} text Text to parse for keywords.
    */
@@ -129,7 +148,6 @@ export default class KeywordExtractor {
         remove_duplicates: true
       });
 
-    // add keywords to the list
     this.addKeywordsToList(extraction_result);
   }
 
@@ -138,7 +156,6 @@ export default class KeywordExtractor {
    * @param {string} keywords Comma separated list of keywords.
    */
   addKeywords(keywords) {
-    // Add keywords to the list
     keywords = keywords.split(',').map((keyword) => keyword.trim());
     this.addKeywordsToList(keywords);
   }
@@ -148,57 +165,43 @@ export default class KeywordExtractor {
    * @param {string[]} keywords Keywords.
    */
   addKeywordsToList(keywords = []) {
-    // TODO: Don't use DOM to store keywords
-    // TODO: Don't add keywords that are already in list
-
     keywords.forEach((keyword) => {
+      if (this.keywordLabels.includes(keyword)) {
+        return; // Duplicate
+      }
+
       const keywordElement = document.createElement('span');
       keywordElement.classList.add('extracted-keyword');
       keywordElement.innerText = keyword;
 
+      this.keywordLabels.push(keyword);
+
       // TODO: Think about delegating the listener to this.keywordContainer
       keywordElement.addEventListener('click', () => {
         keywordElement.remove();
-        this.keywordSyncWithField('toField');
+
+        this.keywordLabels = this.keywordLabels.filter((keywordText) => {
+          return keywordText !== keyword;
+        });
+
+        this.updateValues();
       });
 
       this.keywordContainer.append(keywordElement);
     });
 
-    this.keywordSyncWithField('toField');
+    this.updateValues();
   }
 
   /**
-   * Sync keywords with field.
-   * @param {string} direction Direction of sync.
+   * Update values. Will indirectly store them.
    */
-  keywordSyncWithField(direction) {
-    if (direction === 'toField') {
-      // get all keywords
-      const keywords = this.keywordContainer
-        .querySelectorAll('.extracted-keyword');
-
-      // TODO: See above, don't using DOM to store values
-      const keywordsArray = [];
-      for (let keyword of keywords) {
-        keywordsArray.push(keyword.textContent);
-      }
-
-      // set keywords to field
-      this.setInputValue(
-        this.fieldInstance.children[2].$input[0],
-        keywordsArray.join(',')
-      );
+  updateValues() {
+    if (!this.keywordsField) {
+      return;
     }
-  }
 
-  /**
-   * Set the given value for the given input and trigger the change event.
-   * @param {HTMLInputElement} input Input element.
-   * @param {string} value New value.
-   */
-  setInputValue(input, value) {
-    input.value = value;
-    input.dispatchEvent(new Event('change'));
+    this.keywordsField.$input[0].value = this.keywordLabels ?? '';
+    this.keywordsField.$input[0].dispatchEvent(new Event('change'));
   }
 }
