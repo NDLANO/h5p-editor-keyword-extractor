@@ -1,3 +1,4 @@
+import DOMUtil from '@services/dom-util';
 import H5PUtil from '@services/h5p-util';
 import * as KeywordExtractorEngine from 'keyword-extractor';
 
@@ -184,14 +185,22 @@ export default class KeywordExtractor {
 
       this.keywordLabels.push(keyword);
 
-      keywordElement.addEventListener('click', () => {
-        keywordElement.parentNode.remove();
+      keywordElement.addEventListener('click', (event) => {
+        const wrapper = keywordElement.parentNode;
+        const position = [...this.keywordContainer.childNodes]
+          .findIndex((item) => item === wrapper);
+
+        wrapper.remove();
 
         this.keywordLabels = this.keywordLabels.filter((keywordText) => {
           return keywordText !== keyword;
         });
 
         this.updateValues();
+
+        if (event.detail === 0) { // Using keyboard
+          this.refocus(position);
+        }
       });
 
       this.keywordContainer.append(keywordWrapper);
@@ -230,5 +239,26 @@ export default class KeywordExtractor {
         return a.childNodes[0].innerText > b.childNodes[0].innerText ? 1 : -1;
       })
       .forEach((node) => parent.append(node));
+  }
+
+  /**
+   * Set focus to other keyword element at position.
+   * @param {number} position Index of item to set focus to.
+   */
+  refocus(position) {
+    if (typeof position !== 'number') {
+      return;
+    }
+
+    position = Math.min(position, this.keywordLabels.length - 1);
+
+    if (position === -1) {
+      // No more keyword left
+      (DOMUtil.findClosestFocussable(this.keywordContainer))?.focus();
+    }
+    else {
+      // This is a little ugly
+      this.keywordContainer.childNodes[position].childNodes[0].focus();
+    }
   }
 }
