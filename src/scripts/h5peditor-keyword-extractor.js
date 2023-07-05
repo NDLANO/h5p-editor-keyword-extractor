@@ -48,6 +48,7 @@ export default class KeywordExtractor {
 
     // TODO: Error message if no keywordsField
 
+    // TODO: Use matching aria pattern
     this.keywordContainer = document.createElement('div');
     this.keywordContainer.classList.add('h5p-keyword-container');
 
@@ -120,6 +121,8 @@ export default class KeywordExtractor {
       button.classList.add('h5peditor-button', 'h5peditor-button-textual');
       button.innerText = this.t(command);
 
+      // TODO: Disable button if no action possible
+
       button.addEventListener('click', () => {
         const inputText = childInstance.$input.val().trim();
 
@@ -170,14 +173,14 @@ export default class KeywordExtractor {
         return; // Duplicate
       }
 
-      const keywordElement = document.createElement('span');
+      const keywordElement = document.createElement('button');
       keywordElement.classList.add('extracted-keyword');
       keywordElement.innerText = keyword;
 
       this.keywordLabels.push(keyword);
 
-      // TODO: Think about delegating the listener to this.keywordContainer
       keywordElement.addEventListener('click', () => {
+        // TODO: Take care of focus
         keywordElement.remove();
 
         this.keywordLabels = this.keywordLabels.filter((keywordText) => {
