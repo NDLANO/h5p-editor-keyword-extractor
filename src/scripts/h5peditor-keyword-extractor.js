@@ -122,8 +122,6 @@ export default class KeywordExtractor {
       button.classList.add('h5peditor-button', 'h5peditor-button-textual');
       button.innerText = this.t(command);
 
-      // TODO: Disable button if no action possible
-
       button.addEventListener('click', () => {
         const inputText = childInstance.$input.get(0).value.trim();
 
