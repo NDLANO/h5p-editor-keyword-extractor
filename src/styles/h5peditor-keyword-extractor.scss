@@ -1,45 +1,51 @@
 .h5peditor-keyword-extractor {
-  display: block;
-
   .field-name-keywords {
     input {
       display: none;
     }
   }
 
-  .extracted-keyword {
-    background-color: transparent;
-    border: 2px solid #d0d0d1;
-    border-radius: 4px;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 1rem;
-    padding: 0.3em;
-    margin: 0 0.5em 0.5em 0;
-    transition: border 400ms ease-out;
+  .h5p-keyword-container {
+    padding: 0;
 
-    &:after {
-      color: #747275;
-      content: "\f00d";
-      font-family: "H5PFontAwesome4", sans-serif;
-      margin-left: 0.3rem;
-    }
+    .extracted-keyword-wrapper {
+      display: inline-block;
 
-    &:hover {
-      border-color: #1a73d9;
-      background-color: #d9e9fc;
+      .extracted-keyword {
+        background-color: transparent;
+        border: 2px solid #d0d0d1;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 1rem;
+        padding: 0.3em;
+        margin: 0 0.5em 0.5em 0;
+        transition: border 400ms ease-out;
 
-      &:after {
-        color: #174d7e;
-      }
-    }
+        &:after {
+          color: #747275;
+          content: "\f00d";
+          font-family: "H5PFontAwesome4", sans-serif;
+          margin-left: 0.3rem;
+        }
 
-    &:focus {
-      border-color: #1a73d9;
-      background-color: #d9e9fc;
+        &:hover {
+          border-color: #1a73d9;
+          background-color: #d9e9fc;
 
-      &:after {
-        color: #174d7e;
+          &:after {
+            color: #174d7e;
+          }
+        }
+
+        &:focus {
+          border-color: #1a73d9;
+          background-color: #d9e9fc;
+
+          &:after {
+            color: #174d7e;
+          }
+        }
       }
     }
   }

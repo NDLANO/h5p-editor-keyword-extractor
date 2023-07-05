@@ -49,7 +49,7 @@ export default class KeywordExtractor {
     // TODO: Error message if no keywordsField
 
     // TODO: Use matching aria pattern
-    this.keywordContainer = document.createElement('div');
+    this.keywordContainer = document.createElement('ul');
     this.keywordContainer.classList.add('h5p-keyword-container');
 
     this.fieldInstance.$content.get(0).append(this.keywordContainer);
@@ -173,9 +173,14 @@ export default class KeywordExtractor {
         return; // Duplicate
       }
 
+      const keywordWrapper = document.createElement('li');
+      keywordWrapper.classList.add('extracted-keyword-wrapper');
+
       const keywordElement = document.createElement('button');
       keywordElement.classList.add('extracted-keyword');
       keywordElement.innerText = keyword;
+      keywordElement.ariaLabel = `${keyword}. ${this.t('keywordRemoveButton')}`;
+      keywordWrapper.append(keywordElement);
 
       this.keywordLabels.push(keyword);
 
@@ -190,7 +195,7 @@ export default class KeywordExtractor {
         this.updateValues();
       });
 
-      this.keywordContainer.append(keywordElement);
+      this.keywordContainer.append(keywordWrapper);
     });
 
     // Sort internally and externally
@@ -222,7 +227,9 @@ export default class KeywordExtractor {
     }
 
     [...parent.children]
-      .sort((a, b)=> a.innerText > b.innerText ? 1 : -1)
+      .sort((a, b) => {
+        return a.childNodes[0].innerText > b.childNodes[0].innerText ? 1 : -1;
+      })
       .forEach((node) => parent.append(node));
   }
 }
