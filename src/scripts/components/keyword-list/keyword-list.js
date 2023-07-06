@@ -1,6 +1,6 @@
 import DOMUtil from '@services/dom-util';
 import Util from '@services/util';
-import KeywordButtonListitem from '@components/keyword-button-listitem';
+import KeywordListitem from './keyword-listitem';
 import './keyword-list.scss';
 
 export default class KeywordList {
@@ -48,7 +48,7 @@ export default class KeywordList {
         return; // Invalid or duplicate
       }
 
-      const keywordItem = new KeywordButtonListitem(
+      const keywordItem = new KeywordListitem(
         {
           label: keyword,
           ariaLabel: `${keyword}. ${this.params.ariaRemove}`

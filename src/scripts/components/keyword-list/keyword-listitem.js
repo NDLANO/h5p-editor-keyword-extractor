@@ -1,7 +1,7 @@
 import Util from '@services/util';
-import './keyword-button-listitem.scss';
+import './keyword-listitem.scss';
 
-export default class KeywordButtonListitem {
+export default class KeywordListitem {
   /**
    * @class
    * @param {object} [params] Parameters.

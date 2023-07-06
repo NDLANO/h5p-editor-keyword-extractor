@@ -1,7 +1,7 @@
 import H5PUtil from '@services/h5p-util';
 import KeywordUtil from '@services/keyword-utils';
 import CommandButton from '@components/command-button';
-import KeywordList from '@components/keyword-list';
+import KeywordList from '@components/keyword-list/keyword-list';
 
 /** Class for KeywordExtractor widget */
 export default class KeywordExtractor {
