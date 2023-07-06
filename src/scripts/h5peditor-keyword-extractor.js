@@ -1,8 +1,7 @@
-import DOMUtil from '@services/dom-util';
 import H5PUtil from '@services/h5p-util';
 import KeywordUtil from '@services/keyword-utils';
 import CommandButton from '@components/command-button';
-import KeywordButtonListitem from '@components/keyword-button-listitem';
+import KeywordList from '@components/keyword-list';
 
 /** Class for KeywordExtractor widget */
 export default class KeywordExtractor {
@@ -17,13 +16,11 @@ export default class KeywordExtractor {
   constructor(parent, field, params, setValue) {
     this.parent = parent;
     this.field = field;
-    this.params = params;
+    this.params = params || {};
     this.setValue = setValue;
 
     // Let parent handle ready callbacks of children
     this.passReadies = true;
-
-    this.keywordItems = [];
 
     // DOM
     this.$container = H5P.jQuery('<div>', {
@@ -51,11 +48,17 @@ export default class KeywordExtractor {
 
     // TODO: Error message if no keywordsField
 
-    // TODO: Use matching aria pattern
-    this.keywordContainer = document.createElement('ul');
-    this.keywordContainer.classList.add('h5p-keyword-container');
-
-    this.fieldInstance.$content.get(0).append(this.keywordContainer);
+    this.keywordList = new KeywordList(
+      {
+        ariaRemove: this.t('keywordRemoveButton')
+      },
+      {
+        onUpdated: () => {
+          this.updateValues();
+        }
+      }
+    );
+    this.fieldInstance.$content.get(0).append(this.keywordList.getDOM());
 
     // Re-create previously stored keywords
     if (this.params.keywords) {
@@ -63,7 +66,7 @@ export default class KeywordExtractor {
         text: this.params.keywords,
         mode: 'comma-separated'
       });
-      this.addKeywordsToList(keywords);
+      this.keywordList.addKeywords(keywords);
     }
 
     this.$errors = this.$container.find('.h5p-errors');
@@ -138,59 +141,12 @@ export default class KeywordExtractor {
                 'extract',
               language: H5PEditor.contentLanguage
             });
-            this.addKeywordsToList(keywords);
+            this.keywordList.addKeywords(keywords);
           }
         }
       );
       childInstance.$item.get(0).append(button.getDOM());
     }
-  }
-
-  /**
-   * Generate keywords elements.
-   * @param {string[]} keywords Keywords.
-   */
-  addKeywordsToList(keywords = []) {
-    keywords.forEach((keyword) => {
-      if (this.keywordItems.find((item) => item.getLabel() === keyword)) {
-        return; // Duplicate
-      }
-
-      const keywordItem = new KeywordButtonListitem(
-        {
-          label: keyword,
-          ariaLabel: `${keyword}. ${this.t('keywordRemoveButton')}`
-        },
-        {
-          onClicked: (event) => {
-            const position = this.keywordItems.findIndex((item) => {
-              return item.getLabel() === keyword;
-            });
-
-            this.keywordItems[position].removeDOM();
-            this.keywordItems.splice(position, 1);
-
-            this.updateValues();
-
-            if (event.detail === 0) { // Using keyboard
-              this.refocus(position);
-            }
-          }
-        }
-      );
-      this.keywordItems.push(keywordItem);
-
-      this.keywordContainer.append(keywordItem.getDOM());
-    });
-
-    // Sort internally and externally
-    this.keywordItems
-      .sort((a, b) => a.getLabel() > b.getLabel() ? 1 : -1)
-      .forEach((item) => {
-        this.keywordContainer.append(item.getDOM());
-      });
-
-    this.updateValues();
   }
 
   /**
@@ -201,28 +157,8 @@ export default class KeywordExtractor {
       return;
     }
 
-    this.keywordItemsField.$input[0].value = this.keywordItems
-      .map((item) => item.getLabel()).join(',') ?? '';
-    this.keywordItemsField.$input[0].dispatchEvent(new Event('change'));
-  }
-
-  /**
-   * Set focus to other keyword element at position.
-   * @param {number} position Index of item to set focus to.
-   */
-  refocus(position) {
-    if (typeof position !== 'number') {
-      return;
-    }
-
-    position = Math.min(position, this.keywordItems.length - 1);
-
-    if (position === -1) {
-      // No more keyword left
-      (DOMUtil.findClosestFocussable(this.keywordContainer))?.focus();
-    }
-    else {
-      this.keywordItems[position].focus();
-    }
+    const keywordField = this.keywordItemsField.$input[0];
+    keywordField.value = this.keywordList.getKeywords({ asString: true });
+    keywordField.dispatchEvent(new Event('change'));
   }
 }
