@@ -12,9 +12,7 @@ export default class KeywordListitem {
   constructor(params = {}, callbacks = {}) {
     this.params = Util.extend(params, {});
 
-    callbacks = Util.extend({
-      onClicked: () => {}
-    }, callbacks);
+    callbacks = Util.extend({}, callbacks);
 
     this.dom = document.createElement('li');
     this.dom.classList.add('extracted-keyword-wrapper');
@@ -23,9 +21,7 @@ export default class KeywordListitem {
     this.keywordButton.classList.add('extracted-keyword');
     this.keywordButton.innerText = params.label;
     this.keywordButton.ariaLabel = params.ariaLabel;
-    this.keywordButton.addEventListener('click', (event) => {
-      callbacks.onClicked(event);
-    });
+    this.keywordButton.setAttribute('tabindex', '-1');
 
     this.dom.append(this.keywordButton);
   }
@@ -36,6 +32,14 @@ export default class KeywordListitem {
    */
   getDOM() {
     return this.dom;
+  }
+
+  /**
+   * Get button DOM.
+   * @returns {HTMLButtonElement} Button DOM.
+   */
+  getButtonDOM() {
+    return this.keywordButton;
   }
 
   /**
@@ -51,6 +55,14 @@ export default class KeywordListitem {
    */
   focus() {
     this.keywordButton.focus();
+  }
+
+  /**
+   * Make tabbable.
+   * @param {boolean} state If true, make tabbable, else untabbable.
+   */
+  makeTabbable(state) {
+    this.keywordButton.setAttribute('tabindex', state ? '0' : '-1');
   }
 
   /**

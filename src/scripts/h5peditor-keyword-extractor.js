@@ -65,7 +65,8 @@ export default class KeywordExtractor {
 
     this.keywordList = new KeywordList(
       {
-        ariaRemove: this.t('keywordRemoveButton')
+        ariaRemoveKeyword: this.t('ariaRemoveKeyword'),
+        ariaKeywordList: this.t('ariaKeywordList')
       },
       {
         onUpdated: () => {
