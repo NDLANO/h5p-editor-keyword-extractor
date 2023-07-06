@@ -201,7 +201,8 @@ export default class KeywordExtractor {
       return;
     }
 
-    this.keywordItemsField.$input[0].value = this.keywordItems.map((item) => item.getLabel()).join(',') ?? '';
+    this.keywordItemsField.$input[0].value = this.keywordItems
+      .map((item) => item.getLabel()).join(',') ?? '';
     this.keywordItemsField.$input[0].dispatchEvent(new Event('change'));
   }
 
