@@ -1,6 +1,7 @@
 import H5PUtil from '@services/h5p-util';
 import KeywordUtil from '@services/keyword-utils';
 import CommandButton from '@components/command-button';
+import MessageBox from '@components/message-box/message-box';
 import KeywordList from '@components/keyword-list/keyword-list';
 
 /** Class for KeywordExtractor widget */
@@ -34,11 +35,16 @@ export default class KeywordExtractor {
       this.params,
       this.setValue
     );
+
+    if (!this.fieldInstance instanceof H5PEditor.Group) {
+      const messageBox = new MessageBox({
+        text: this.t('noFieldInstance')
+      });
+      this.$container.get(0).append(messageBox.getDOM());
+
+      return;
+    }
     this.fieldInstance.appendTo(this.$container);
-
-    // TODO: Error message if no fieldInstance or not instance of Group
-
-    this.addButtons();
 
     // Set keywords field
     this.keywordItemsField = H5PUtil.findFieldInstance(
@@ -46,7 +52,16 @@ export default class KeywordExtractor {
       this.fieldInstance
     );
 
-    // TODO: Error message if no keywordsField
+    if (!this.keywordItemsField instanceof H5PEditor.Text) {
+      const messageBox = new MessageBox({
+        text: this.t('noKeywordsField')
+      });
+      this.fieldInstance.$content?.get(0).append(messageBox.getDOM());
+
+      return;
+    }
+
+    this.addButtons();
 
     this.keywordList = new KeywordList(
       {
@@ -58,7 +73,7 @@ export default class KeywordExtractor {
         }
       }
     );
-    this.fieldInstance.$content.get(0).append(this.keywordList.getDOM());
+    this.fieldInstance.$content?.get(0).append(this.keywordList.getDOM());
 
     // Re-create previously stored keywords
     if (this.params.keywords) {

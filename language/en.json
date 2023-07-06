@@ -2,6 +2,8 @@
   "libraryStrings": {
     "extractKeywords": "Extract keywords",
     "parseKeywordsComma": "Add keywords",
-    "keywordRemoveButton": "Remove"
+    "keywordRemoveButton": "Remove",
+    "noFieldInstance": "The KeywordExtractor widget does not seem to be attached to a \"Group\" field. Please check your semantics.json.",
+    "noKeywordsField": "Could not find \"Text\" field specified by \"keywordExtractor.keywords\" property. Please check your semantics.json."
   }
 }
