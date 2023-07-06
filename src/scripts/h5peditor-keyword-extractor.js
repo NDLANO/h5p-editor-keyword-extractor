@@ -1,6 +1,7 @@
 import DOMUtil from '@services/dom-util';
 import H5PUtil from '@services/h5p-util';
-import * as KeywordExtractorEngine from 'keyword-extractor';
+import KeywordUtil from '@services/keyword-utils';
+import CommandButton from './components/command-button';
 
 /** Class for KeywordExtractor widget */
 export default class KeywordExtractor {
@@ -57,7 +58,11 @@ export default class KeywordExtractor {
 
     // Re-create previously stored keywords
     if (this.params.keywords) {
-      this.addKeywords(this.params.keywords);
+      const keywords = KeywordUtil.getKeywords({
+        text: this.params.keywords,
+        mode: 'comma-separated'
+      });
+      this.addKeywordsToList(keywords);
     }
 
     this.$errors = this.$container.find('.h5p-errors');
@@ -104,7 +109,7 @@ export default class KeywordExtractor {
     for (const fieldName in buttonConfig) {
       const command = buttonConfig[fieldName];
 
-      if (!['generateKeywords', 'addKeywords'].includes(command)) {
+      if (!['extractKeywords', 'parseKeywordsComma'].includes(command)) {
         return; // No valid command for button
       }
 
@@ -118,48 +123,26 @@ export default class KeywordExtractor {
         continue;
       }
 
-      const button = document.createElement('button');
-      button.classList.add('h5peditor-button', 'h5peditor-button-textual');
-      button.innerText = this.t(command);
-
-      button.addEventListener('click', () => {
-        const inputText = childInstance.$input.get(0).value.trim();
-
-        if (command === 'generateKeywords') {
-          this.generateKeywords(inputText);
+      const button = new CommandButton(
+        {
+          label: this.t(command)
+        },
+        {
+          onClicked: () => {
+            const inputText = childInstance.$input.get(0).value.trim();
+            const keywords = KeywordUtil.getKeywords({
+              text: inputText,
+              mode: (command === 'parseKeywordsComma') ?
+                'comma-separated' :
+                'extract',
+              language: H5PEditor.contentLanguage
+            });
+            this.addKeywordsToList(keywords);
+          }
         }
-        else if (command === 'addKeywords') {
-          this.addKeywords(inputText);
-        }
-      });
-
-      childInstance.$item.append(button);
+      );
+      childInstance.$item.get(0).append(button.getDOM());
     }
-  }
-
-  /**
-   * Generate keywords from text.
-   * @param {string} text Text to parse for keywords.
-   */
-  generateKeywords(text) {
-    const extraction_result =
-      KeywordExtractorEngine.extract(text, {
-        language: 'english',
-        remove_digits: true,
-        return_changed_case:true,
-        remove_duplicates: true
-      });
-
-    this.addKeywordsToList(extraction_result);
-  }
-
-  /**
-   * Add keywords to the list.
-   * @param {string} keywords Comma separated list of keywords.
-   */
-  addKeywords(keywords) {
-    keywords = keywords.split(',').map((keyword) => keyword.trim());
-    this.addKeywordsToList(keywords);
   }
 
   /**
