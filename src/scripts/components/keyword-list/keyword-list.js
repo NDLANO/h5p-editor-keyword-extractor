@@ -125,7 +125,7 @@ export default class KeywordList {
 
     if (position === -1) {
       // No more keyword left
-      (DOMUtil.findClosestFocussable(this.keywordList.getDOM()))?.focus();
+      (DOMUtil.findClosestFocussable(this.dom))?.focus();
     }
     else {
       this.keywordItems[position].focus();

@@ -45,7 +45,7 @@ export default class DOMUtil {
       return null;
     }
 
-    const done = false;
+    let done = false;
     return DOMUtil
       .getFocussableElements(element.parentNode)
       .reduce((siblings, focussableElement) => {
