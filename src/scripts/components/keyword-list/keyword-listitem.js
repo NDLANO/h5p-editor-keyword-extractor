@@ -15,10 +15,14 @@ export default class KeywordListitem {
     callbacks = Util.extend({}, callbacks);
 
     this.dom = document.createElement('li');
-    this.dom.classList.add('extracted-keyword-wrapper');
+    this.dom.classList.add(
+      'h5peditor-keyword-extractor-keyword-item-wrapper'
+    );
 
     this.keywordButton = document.createElement('button');
-    this.keywordButton.classList.add('extracted-keyword');
+    this.keywordButton.classList.add(
+      'h5peditor-keyword-extractor-keyword-item'
+    );
     this.keywordButton.innerText = params.label;
     this.keywordButton.ariaLabel = params.ariaLabel;
     this.keywordButton.setAttribute('tabindex', '-1');

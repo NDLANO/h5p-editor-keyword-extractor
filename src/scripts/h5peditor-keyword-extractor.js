@@ -36,6 +36,7 @@ export default class KeywordExtractor {
       this.setValue
     );
 
+    // Set Group field instance
     if (!this.fieldInstance instanceof H5PEditor.Group) {
       const messageBox = new MessageBox({
         text: this.t('noFieldInstance')
@@ -63,6 +64,7 @@ export default class KeywordExtractor {
 
     this.addButtons();
 
+    // Keyword list
     this.keywordList = new KeywordList(
       {
         ariaRemoveKeyword: this.t('ariaRemoveKeyword'),
@@ -78,11 +80,7 @@ export default class KeywordExtractor {
 
     // Re-create previously stored keywords
     if (this.params.keywords) {
-      const keywords = KeywordUtil.getKeywords({
-        text: this.params.keywords,
-        mode: 'comma-separated'
-      });
-      this.keywordList.addKeywords(keywords);
+      this.buildKeywords(this.params.keywords, 'parseKeywordsComma');
     }
 
     this.$errors = this.$container.find('.h5p-errors');
@@ -93,7 +91,7 @@ export default class KeywordExtractor {
    * @param {H5P.jQuery} $wrapper Wrapper.
    */
   appendTo($wrapper) {
-    this.$container.appendTo($wrapper);
+    $wrapper.get(0).append(this.$container.get(0));
   }
 
   /**
@@ -108,7 +106,7 @@ export default class KeywordExtractor {
    * Remove self. Invoked by H5P core.
    */
   remove() {
-    this.$container.remove();
+    this.$container.get(0).remove();
   }
 
   /**
@@ -149,15 +147,9 @@ export default class KeywordExtractor {
         },
         {
           onClicked: () => {
-            const inputText = childInstance.$input.get(0).value.trim();
-            const keywords = KeywordUtil.getKeywords({
-              text: inputText,
-              mode: (command === 'parseKeywordsComma') ?
-                'comma-separated' :
-                'extract',
-              language: H5PEditor.contentLanguage
-            });
-            this.keywordList.addKeywords(keywords);
+            this.buildKeywords(
+              childInstance.$input.get(0).value.trim(), command
+            );
           }
         }
       );
@@ -176,5 +168,22 @@ export default class KeywordExtractor {
     const keywordField = this.keywordItemsField.$input[0];
     keywordField.value = this.keywordList.getKeywords({ asString: true });
     keywordField.dispatchEvent(new Event('change'));
+  }
+
+  /**
+   * Handle command button clicked.
+   * @param {string} inputText Input field text.
+   * @param {string} command Command to use for extraction.
+   */
+  buildKeywords(inputText, command) {
+    const keywords = KeywordUtil.getKeywords({
+      text: inputText,
+      mode: (command === 'parseKeywordsComma') ?
+        'comma-separated' :
+        'extract',
+      language: H5PEditor.contentLanguage
+    });
+
+    this.keywordList.addKeywords(keywords);
   }
 }

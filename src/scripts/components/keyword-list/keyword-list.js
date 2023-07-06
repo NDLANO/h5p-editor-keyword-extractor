@@ -19,7 +19,7 @@ export default class KeywordList {
     this.keywordItems = [];
 
     this.dom = document.createElement('ul');
-    this.dom.classList.add('h5p-keyword-container');
+    this.dom.classList.add('h5peditor-keyword-extractor-keyword-list');
     this.dom.addEventListener('click', (event) => {
       this.removeKeyword(event);
     });
@@ -194,7 +194,7 @@ export default class KeywordList {
   /**
    * Get keywords.
    * @param {object} [params] Parameters.
-   * @param {boolean} [params.asString] If true, return as comma separated string.
+   * @param {boolean} [params.asString] If true, return comma separated string.
    * @returns {string[]|string} Keywords.
    */
   getKeywords(params = {}) {
