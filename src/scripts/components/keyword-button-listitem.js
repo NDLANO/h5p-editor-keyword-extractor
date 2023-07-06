@@ -1,4 +1,5 @@
 import Util from '@services/util';
+import './keyword-button-listitem.scss';
 
 export default class KeywordButtonListitem {
   /**

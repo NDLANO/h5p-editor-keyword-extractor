@@ -1,0 +1,40 @@
+.extracted-keyword-wrapper {
+  display: inline-block;
+
+  .extracted-keyword {
+    background-color: transparent;
+    border: 2px solid #d0d0d1;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 1rem;
+    padding: 0.3em;
+    margin: 0 0.5em 0.5em 0;
+    transition: border 400ms ease-out;
+
+    &:after {
+      color: #747275;
+      content: "\f00d";
+      font-family: "H5PFontAwesome4", sans-serif;
+      margin-left: 0.3rem;
+    }
+
+    &:hover {
+      border-color: #1a73d9;
+      background-color: #d9e9fc;
+
+      &:after {
+        color: #174d7e;
+      }
+    }
+
+    &:focus {
+      border-color: #1a73d9;
+      background-color: #d9e9fc;
+
+      &:after {
+        color: #174d7e;
+      }
+    }
+  }
+}
