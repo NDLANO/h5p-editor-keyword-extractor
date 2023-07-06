@@ -1,7 +1,8 @@
 import DOMUtil from '@services/dom-util';
 import H5PUtil from '@services/h5p-util';
 import KeywordUtil from '@services/keyword-utils';
-import CommandButton from './components/command-button';
+import CommandButton from '@components/command-button';
+import KeywordButtonListitem from '@components/keyword-button-listitem';
 
 /** Class for KeywordExtractor widget */
 export default class KeywordExtractor {
@@ -22,7 +23,7 @@ export default class KeywordExtractor {
     // Let parent handle ready callbacks of children
     this.passReadies = true;
 
-    this.keywordLabels = [];
+    this.keywordItems = [];
 
     // DOM
     this.$container = H5P.jQuery('<div>', {
@@ -43,7 +44,7 @@ export default class KeywordExtractor {
     this.addButtons();
 
     // Set keywords field
-    this.keywordsField = H5PUtil.findFieldInstance(
+    this.keywordItemsField = H5PUtil.findFieldInstance(
       this.field?.keywordExtractor?.keywords,
       this.fieldInstance
     );
@@ -151,45 +152,43 @@ export default class KeywordExtractor {
    */
   addKeywordsToList(keywords = []) {
     keywords.forEach((keyword) => {
-      if (this.keywordLabels.includes(keyword)) {
+      if (this.keywordItems.find((item) => item.getLabel() === keyword)) {
         return; // Duplicate
       }
 
-      const keywordWrapper = document.createElement('li');
-      keywordWrapper.classList.add('extracted-keyword-wrapper');
+      const keywordItem = new KeywordButtonListitem(
+        {
+          label: keyword,
+          ariaLabel: `${keyword}. ${this.t('keywordRemoveButton')}`
+        },
+        {
+          onClicked: (event) => {
+            const position = this.keywordItems.findIndex((item) => {
+              return item.getLabel() === keyword;
+            });
 
-      const keywordElement = document.createElement('button');
-      keywordElement.classList.add('extracted-keyword');
-      keywordElement.innerText = keyword;
-      keywordElement.ariaLabel = `${keyword}. ${this.t('keywordRemoveButton')}`;
-      keywordWrapper.append(keywordElement);
+            this.keywordItems[position].removeDOM();
+            this.keywordItems.splice(position, 1);
 
-      this.keywordLabels.push(keyword);
+            this.updateValues();
 
-      keywordElement.addEventListener('click', (event) => {
-        const wrapper = keywordElement.parentNode;
-        const position = [...this.keywordContainer.childNodes]
-          .findIndex((item) => item === wrapper);
-
-        wrapper.remove();
-
-        this.keywordLabels = this.keywordLabels.filter((keywordText) => {
-          return keywordText !== keyword;
-        });
-
-        this.updateValues();
-
-        if (event.detail === 0) { // Using keyboard
-          this.refocus(position);
+            if (event.detail === 0) { // Using keyboard
+              this.refocus(position);
+            }
+          }
         }
-      });
+      );
+      this.keywordItems.push(keywordItem);
 
-      this.keywordContainer.append(keywordWrapper);
+      this.keywordContainer.append(keywordItem.getDOM());
     });
 
     // Sort internally and externally
-    this.keywordLabels.sort((a, b) => a > b ? 1 : -1);
-    this.sortNodesByText(this.keywordContainer);
+    this.keywordItems
+      .sort((a, b) => a.getLabel() > b.getLabel() ? 1 : -1)
+      .forEach((item) => {
+        this.keywordContainer.append(item.getDOM());
+      });
 
     this.updateValues();
   }
@@ -198,28 +197,12 @@ export default class KeywordExtractor {
    * Update values. Will indirectly store them.
    */
   updateValues() {
-    if (!this.keywordsField) {
+    if (!this.keywordItemsField) {
       return;
     }
 
-    this.keywordsField.$input[0].value = this.keywordLabels ?? '';
-    this.keywordsField.$input[0].dispatchEvent(new Event('change'));
-  }
-
-  /**
-   * Sort nodes by inner text.
-   * @param {HTMLElement} parent Parent node of which children will be sorted.
-   */
-  sortNodesByText(parent) {
-    if (!parent instanceof HTMLElement || !parent?.children) {
-      return;
-    }
-
-    [...parent.children]
-      .sort((a, b) => {
-        return a.childNodes[0].innerText > b.childNodes[0].innerText ? 1 : -1;
-      })
-      .forEach((node) => parent.append(node));
+    this.keywordItemsField.$input[0].value = this.keywordItems.map((item) => item.getLabel()).join(',') ?? '';
+    this.keywordItemsField.$input[0].dispatchEvent(new Event('change'));
   }
 
   /**
@@ -231,15 +214,14 @@ export default class KeywordExtractor {
       return;
     }
 
-    position = Math.min(position, this.keywordLabels.length - 1);
+    position = Math.min(position, this.keywordItems.length - 1);
 
     if (position === -1) {
       // No more keyword left
       (DOMUtil.findClosestFocussable(this.keywordContainer))?.focus();
     }
     else {
-      // This is a little ugly
-      this.keywordContainer.childNodes[position].childNodes[0].focus();
+      this.keywordItems[position].focus();
     }
   }
 }
