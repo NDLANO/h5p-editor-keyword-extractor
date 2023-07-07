@@ -101,6 +101,7 @@ export default class KeywordExtractor {
    * @returns {boolean} True, if current value is valid, else false.
    */
   validate() {
+    this.setValue(this.field, this.params);
     return this.fieldInstance.validate();
   }
 
