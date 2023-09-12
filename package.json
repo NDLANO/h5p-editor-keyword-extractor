@@ -1,6 +1,6 @@
 {
   "name": "h5peditor-keyword-extractor",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Extract keywords from the content or allows to add custom keyword",
   "private": true,
   "scripts": {
