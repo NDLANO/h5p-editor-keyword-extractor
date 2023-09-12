@@ -187,7 +187,7 @@ export default class KeywordExtractor {
       mode: (command === KeywordExtractor.COMMAND_PARSE_KEYWORDS) ?
         'comma-separated' :
         'extract',
-      language: H5PEditor.contentLanguage
+      language: H5PEditor.defaultLanguage // H5PEditor.contentLanguage is not the content language
     });
 
     this.keywordList.addKeywords(keywords);
