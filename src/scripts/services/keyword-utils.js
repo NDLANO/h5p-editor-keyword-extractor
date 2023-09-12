@@ -1,5 +1,4 @@
 import * as KeywordExtractorEngine from 'keyword-extractor';
-import ISO6391 from 'iso-639-1';
 
 export default class KeywordUtil {
   /**
@@ -49,38 +48,21 @@ export default class KeywordUtil {
       return [];
     }
 
-    /*
-     * KeywordExtractorEngine does require language name in lower case and does
-     * not allow to retrieve the list of supported languages in advance.
-     */
-    if (typeof params.language === 'string') {
-      params.language = params.language.toLowerCase();
-    }
-    else {
-      params.language = 'english';
+    if (
+      !KeywordExtractorEngine.supported_language_codes.includes(params.language)
+    ) {
+      delete params.language; // Enforcing default which is 'en'
     }
 
-    let keywords = [];
-    try {
-      keywords = KeywordExtractorEngine.extract(
-        params.text, {
-          language: params.language,
-          remove_digits: true,
-          return_changed_case:true,
-          remove_duplicates: true
-        });
-    }
-    catch (error) {
-      keywords = KeywordExtractorEngine.extract(
-        params.text, {
-          language: 'english',
-          remove_digits: true,
-          return_changed_case:true,
-          remove_duplicates: true
-        });
-    }
-
-    return keywords;
+    return KeywordExtractorEngine.extract(
+      params.text,
+      {
+        language: params.language,
+        remove_digits: true,
+        return_changed_case:true,
+        remove_duplicates: true
+      }
+    );
   }
 
   /**
@@ -94,25 +76,5 @@ export default class KeywordUtil {
     }
 
     return text.split(',').map((keyword) => keyword.trim());
-  }
-
-  /**
-   * Get English language name for ISO 639-1 language code.
-   * @param {string} isoCode ISO 639-1 language code.
-   * @returns {string|null} English language name or null.
-   */
-  static getLanguageName(isoCode) {
-    if (typeof isoCode !== 'string') {
-      return null; // Default
-    }
-
-    // Only interested in macrolanguage
-    isoCode = isoCode.split('-')[0];
-
-    if (!ISO6391.validate(isoCode)) {
-      return null; // No valid code
-    }
-
-    return ISO6391.getName(isoCode);
   }
 }
