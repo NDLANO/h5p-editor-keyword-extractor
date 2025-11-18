@@ -1,10 +1,10 @@
-@import "@styles/colors";
+@use "@styles/colors.scss" as colors;
 
 .h5p-message-box {
-  background-color: $color-hint-message-background;
-  border: 1px solid $color-hint-message-border;
+  background-color: colors.$color-hint-message-background;
+  border: 1px solid colors.$color-hint-message-border;
   box-sizing: border-box;
-  color: $color-hint-message-text;
+  color: colors.$color-hint-message-text;
   font-size: .8em;
   padding: .8em;
 
