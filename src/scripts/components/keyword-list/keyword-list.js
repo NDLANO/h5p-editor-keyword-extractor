@@ -1,6 +1,6 @@
 import DOMUtil from '@services/dom-util';
 import Util from '@services/util';
-import KeywordListitem from './keyword-listitem';
+import KeywordListitem from './keyword-listitem.js';
 import './keyword-list.scss';
 
 export default class KeywordList {
