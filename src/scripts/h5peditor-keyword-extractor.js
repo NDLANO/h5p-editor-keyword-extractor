@@ -37,7 +37,7 @@ export default class KeywordExtractor {
     );
 
     // Set Group field instance
-    if (!this.fieldInstance instanceof H5PEditor.Group) {
+    if (!(this.fieldInstance instanceof H5PEditor.Group)) {
       const messageBox = new MessageBox({
         text: this.t('noFieldInstance')
       });
@@ -53,7 +53,7 @@ export default class KeywordExtractor {
       this.fieldInstance
     );
 
-    if (!this.keywordItemsField instanceof H5PEditor.Text) {
+    if (!(this.keywordItemsField instanceof H5PEditor.Text)) {
       const messageBox = new MessageBox({
         text: this.t('noKeywordsField')
       });
@@ -141,8 +141,8 @@ export default class KeywordExtractor {
         H5PUtil.findFieldInstance(fieldName, this.fieldInstance);
 
       if (
-        !childInstance instanceof H5PEditor.Textarea &&
-        !childInstance instanceof H5PEditor.Text
+        !(childInstance instanceof H5PEditor.Textarea) &&
+        !(childInstance instanceof H5PEditor.Text)
       ) {
         continue;
       }

@@ -6,13 +6,9 @@ export default class KeywordListitem {
    * @class
    * @param {object} [params] Parameters.
    * @param {string} params.label Button label.
-   * @param {object} [callbacks] Callbacks.
-   * @param {function} [callbacks.onClicked] Callback when button clicked.
    */
-  constructor(params = {}, callbacks = {}) {
+  constructor(params = {}) {
     this.params = Util.extend(params, {});
-
-    callbacks = Util.extend({}, callbacks);
 
     this.dom = document.createElement('li');
     this.dom.classList.add(

@@ -7,7 +7,7 @@ export default class DOMUtil {
    * @returns {HTMLElement[]} All focussable elements in container.
    */
   static getFocussableElements(container) {
-    if (!container || !container instanceof HTMLElement) {
+    if (!container || !(container instanceof HTMLElement)) {
       return [];
     }
 
